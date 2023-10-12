@@ -216,6 +216,15 @@ jobs:
       # hacks to work around limitations that are fixed in more recent versions.
       if: matrix.toolchain == 'nightly'
 
+    - name: Red Pen check
+      run: ./redpen.sh run
+      # Red Pen is pinned to a specific toolchain, which typically does not
+      # match any of this CI's usual toolchains. To avoid duplicate redpen runs,
+      # we only run for a particular toolchain value. Note that redpen's
+      # toolchain may be a stable toolchain, in which case we cannot pass
+      # nightly-only RUSTFLAGS, so we choose to run on a stable toolchain.
+      if: matrix.crate == 'zerocopy' && matrix.toolchain == 'stable'
+
     - name: Cargo doc
       # We pass --document-private-items and --document-hidden items to ensure that 
       # documentation always builds even for these items. This makes future changes to 
@@ -460,6 +469,7 @@ jobs:
           cargo install cargo-readme --version 3.2.0 &> /dev/null || true
           cargo install --locked kani-verifier       &> /dev/null || true
           cargo kani setup                           &> /dev/null || true
+          ./redpen.sh install                        &> /dev/null || true
 
   # Used to signal to branch protections that all other jobs have succeeded.
   all-jobs-succeed:
