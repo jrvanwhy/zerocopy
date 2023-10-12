@@ -41,6 +41,7 @@ simd-nightly = ["simd"]
 __internal_use_only_features_that_work_on_stable = ["alloc", "derive", "simd"]
 
 [dependencies]
+redpen = { package = "redpen-shim", version = "=0.2.0" }
 zerocopy-derive = { version = "=0.7.12", path = "zerocopy-derive", optional = true }
 
 [dependencies.byteorder]
