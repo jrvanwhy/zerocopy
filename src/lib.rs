@@ -238,6 +238,13 @@ extern crate self as zerocopy;
 #[macro_use]
 mod macros;
 
+/// Red pen test function.
+#[redpen::dont_panic]
+#[inline]
+pub fn redpen_test() {
+    panic!("Red Pen should fail on this.");
+}
+
 #[cfg(feature = "byteorder")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "byteorder")))]
 pub mod byteorder;
