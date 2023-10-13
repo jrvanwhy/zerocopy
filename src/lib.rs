@@ -221,6 +221,13 @@
 #[macro_use]
 mod macros;
 
+/// Red pen test function.
+#[redpen::dont_panic]
+#[inline]
+pub fn redpen_test() {
+    panic!("Red Pen should fail on this.");
+}
+
 #[cfg(feature = "byteorder")]
 pub mod byteorder;
 #[doc(hidden)]
