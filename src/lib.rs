@@ -238,13 +238,6 @@ extern crate self as zerocopy;
 #[macro_use]
 mod macros;
 
-/// Red pen test function.
-#[redpen::dont_panic]
-#[inline]
-pub fn redpen_test() {
-    panic!("Red Pen should fail on this.");
-}
-
 #[cfg(feature = "byteorder")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "byteorder")))]
 pub mod byteorder;
@@ -383,6 +376,7 @@ struct TrailingSliceLayout<E = usize> {
 impl SizeInfo {
     /// Attempts to create a `SizeInfo` from `Self` in which `elem_size` is a
     /// `NonZeroUsize`. If `elem_size` is 0, returns `None`.
+    #[redpen::dont_panic]
     const fn _try_to_nonzero_elem_size(&self) -> Option<SizeInfo<NonZeroUsize>> {
         Some(match *self {
             SizeInfo::Sized { _size } => SizeInfo::Sized { _size },
@@ -437,6 +431,7 @@ impl DstLayout {
     /// Unsafe code may assume that `DstLayout` is the correct layout for `T`.
     #[doc(hidden)]
     #[inline]
+    #[redpen::dont_panic]
     pub const fn for_type<T>() -> DstLayout {
         // SAFETY: `align` is correct by construction. `T: Sized`, and so it is
         // sound to initialize `size_info` to `SizeInfo::Sized { size }`; the
@@ -455,6 +450,7 @@ impl DstLayout {
     /// # Safety
     ///
     /// Unsafe code may assume that `DstLayout` is the correct layout for `[T]`.
+    #[redpen::dont_panic]
     const fn for_slice<T>() -> DstLayout {
         // SAFETY: The alignment of a slice is equal to the alignment of its
         // element type, and so `align` is initialized correctly.
@@ -728,6 +724,7 @@ impl DstLayout {
     /// `validate_cast_and_convert_metadata` will panic. The caller should not
     /// rely on `validate_cast_and_convert_metadata` panicking in any particular
     /// condition, even if `debug_assertions` are enabled.
+    #[redpen::dont_panic]
     const fn _validate_cast_and_convert_metadata(
         &self,
         addr: usize,
@@ -1302,6 +1299,7 @@ pub unsafe trait FromZeroes {
     /// assert_eq!(header.length, [0, 0]);
     /// assert_eq!(header.checksum, [0, 0]);
     /// ```
+    #[redpen::dont_panic]
     #[inline(always)]
     fn zero(&mut self) {
         let slf: *mut Self = self;
@@ -1342,6 +1340,7 @@ pub unsafe trait FromZeroes {
     /// assert_eq!(header.length, [0, 0]);
     /// assert_eq!(header.checksum, [0, 0]);
     /// ```
+    #[redpen::dont_panic]
     #[inline(always)]
     fn new_zeroed() -> Self
     where
@@ -1369,6 +1368,7 @@ pub unsafe trait FromZeroes {
     /// # Panics
     ///
     /// Panics if allocation of `size_of::<Self>()` bytes fails.
+    #[redpen::dont_panic]
     #[cfg(feature = "alloc")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "alloc")))]
     #[inline]
@@ -1417,6 +1417,7 @@ pub unsafe trait FromZeroes {
     ///
     /// * Panics if `size_of::<Self>() * len` overflows.
     /// * Panics if allocation of `size_of::<Self>() * len` bytes fails.
+    #[redpen::dont_panic]
     #[cfg(feature = "alloc")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "alloc")))]
     #[inline]
@@ -1484,6 +1485,7 @@ pub unsafe trait FromZeroes {
     ///
     /// * Panics if `size_of::<Self>() * len` overflows.
     /// * Panics if allocation of `size_of::<Self>() * len` bytes fails.
+    #[redpen::dont_panic]
     #[cfg(feature = "alloc")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "new_vec_zeroed")))]
     #[inline(always)]
@@ -1798,6 +1800,7 @@ pub unsafe trait FromBytes: FromZeroes {
     /// Reads a copy of `Self` from `bytes`.
     ///
     /// If `bytes.len() != size_of::<Self>()`, `read_from` returns `None`.
+    #[redpen::dont_panic]
     #[inline]
     fn read_from(bytes: &[u8]) -> Option<Self>
     where
@@ -1811,6 +1814,7 @@ pub unsafe trait FromBytes: FromZeroes {
     /// `read_from_prefix` reads a `Self` from the first `size_of::<Self>()`
     /// bytes of `bytes`. If `bytes.len() < size_of::<Self>()`, it returns
     /// `None`.
+    #[redpen::dont_panic]
     #[inline]
     fn read_from_prefix(bytes: &[u8]) -> Option<Self>
     where
@@ -1825,6 +1829,7 @@ pub unsafe trait FromBytes: FromZeroes {
     /// `read_from_suffix` reads a `Self` from the last `size_of::<Self>()`
     /// bytes of `bytes`. If `bytes.len() < size_of::<Self>()`, it returns
     /// `None`.
+    #[redpen::dont_panic]
     #[inline]
     fn read_from_suffix(bytes: &[u8]) -> Option<Self>
     where
@@ -1929,6 +1934,7 @@ pub unsafe trait AsBytes {
     ///
     /// `as_bytes` provides access to the bytes of this value as an immutable
     /// byte slice.
+    #[redpen::dont_panic]
     #[inline(always)]
     fn as_bytes(&self) -> &[u8] {
         // Note that this method does not have a `Self: Sized` bound;
@@ -1964,6 +1970,7 @@ pub unsafe trait AsBytes {
     ///
     /// `as_bytes_mut` provides access to the bytes of this value as a mutable
     /// byte slice.
+    #[redpen::dont_panic]
     #[inline(always)]
     fn as_bytes_mut(&mut self) -> &mut [u8]
     where
@@ -2000,6 +2007,7 @@ pub unsafe trait AsBytes {
     /// Writes a copy of `self` to `bytes`.
     ///
     /// If `bytes.len() != size_of_val(self)`, `write_to` returns `None`.
+    #[redpen::dont_panic]
     #[inline]
     fn write_to(&self, bytes: &mut [u8]) -> Option<()> {
         if bytes.len() != mem::size_of_val(self) {
@@ -2014,6 +2022,7 @@ pub unsafe trait AsBytes {
     ///
     /// `write_to_prefix` writes `self` to the first `size_of_val(self)` bytes
     /// of `bytes`. If `bytes.len() < size_of_val(self)`, it returns `None`.
+    #[redpen::dont_panic]
     #[inline]
     fn write_to_prefix(&self, bytes: &mut [u8]) -> Option<()> {
         let size = mem::size_of_val(self);
@@ -2025,6 +2034,7 @@ pub unsafe trait AsBytes {
     ///
     /// `write_to_suffix` writes `self` to the last `size_of_val(self)` bytes of
     /// `bytes`. If `bytes.len() < size_of_val(self)`, it returns `None`.
+    #[redpen::dont_panic]
     #[inline]
     fn write_to_suffix(&self, bytes: &mut [u8]) -> Option<()> {
         let start = bytes.len().checked_sub(mem::size_of_val(self))?;
@@ -2949,6 +2959,7 @@ where
     /// `new` verifies that `bytes.len() == size_of::<T>()` and that `bytes` is
     /// aligned to `align_of::<T>()`, and constructs a new `Ref`. If either of
     /// these checks fail, it returns `None`.
+    #[redpen::dont_panic]
     #[inline]
     pub fn new(bytes: B) -> Option<Ref<B, T>> {
         if bytes.len() != mem::size_of::<T>() || !util::aligned_to::<_, T>(bytes.deref()) {
@@ -2964,6 +2975,7 @@ where
     /// `size_of::<T>()` bytes from `bytes` to construct a `Ref`, and returns
     /// the remaining bytes to the caller. If either the length or alignment
     /// checks fail, it returns `None`.
+    #[redpen::dont_panic]
     #[inline]
     pub fn new_from_prefix(bytes: B) -> Option<(Ref<B, T>, B)> {
         if bytes.len() < mem::size_of::<T>() || !util::aligned_to::<_, T>(bytes.deref()) {
@@ -2981,6 +2993,7 @@ where
     /// `bytes` to construct a `Ref`, and returns the preceding bytes to the
     /// caller. If either the length or alignment checks fail, it returns
     /// `None`.
+    #[redpen::dont_panic]
     #[inline]
     pub fn new_from_suffix(bytes: B) -> Option<(B, Ref<B, T>)> {
         let bytes_len = bytes.len();
@@ -3007,6 +3020,7 @@ where
     /// # Panics
     ///
     /// `new_slice` panics if `T` is a zero-sized type.
+    #[redpen::dont_panic]
     #[inline]
     pub fn new_slice(bytes: B) -> Option<Ref<B, [T]>> {
         let remainder = bytes
@@ -3031,6 +3045,7 @@ where
     /// # Panics
     ///
     /// `new_slice_from_prefix` panics if `T` is a zero-sized type.
+    #[redpen::dont_panic]
     #[inline]
     pub fn new_slice_from_prefix(bytes: B, count: usize) -> Option<(Ref<B, [T]>, B)> {
         let expected_len = match mem::size_of::<T>().checked_mul(count) {
@@ -3056,6 +3071,7 @@ where
     /// # Panics
     ///
     /// `new_slice_from_suffix` panics if `T` is a zero-sized type.
+    #[redpen::dont_panic]
     #[inline]
     pub fn new_slice_from_suffix(bytes: B, count: usize) -> Option<(B, Ref<B, [T]>)> {
         let expected_len = match mem::size_of::<T>().checked_mul(count) {
@@ -3068,6 +3084,7 @@ where
     }
 }
 
+#[redpen::dont_panic]
 fn map_zeroed<B: ByteSliceMut, T: ?Sized>(opt: Option<Ref<B, T>>) -> Option<Ref<B, T>> {
     match opt {
         Some(mut r) => {
@@ -3078,6 +3095,7 @@ fn map_zeroed<B: ByteSliceMut, T: ?Sized>(opt: Option<Ref<B, T>>) -> Option<Ref<
     }
 }
 
+#[redpen::dont_panic]
 fn map_prefix_tuple_zeroed<B: ByteSliceMut, T: ?Sized>(
     opt: Option<(Ref<B, T>, B)>,
 ) -> Option<(Ref<B, T>, B)> {
@@ -3090,6 +3108,7 @@ fn map_prefix_tuple_zeroed<B: ByteSliceMut, T: ?Sized>(
     }
 }
 
+#[redpen::dont_panic]
 fn map_suffix_tuple_zeroed<B: ByteSliceMut, T: ?Sized>(
     opt: Option<(B, Ref<B, T>)>,
 ) -> Option<(B, Ref<B, T>)> {
@@ -3109,6 +3128,7 @@ where
     /// If the checks succeed, then `bytes` will be initialized to zero. This
     /// can be useful when re-using buffers to ensure that sensitive data
     /// previously stored in the buffer is not leaked.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn new_zeroed(bytes: B) -> Option<Ref<B, T>> {
         map_zeroed(Self::new(bytes))
@@ -3126,6 +3146,7 @@ where
     /// If the checks succeed, then the prefix which is consumed will be
     /// initialized to zero. This can be useful when re-using buffers to ensure
     /// that sensitive data previously stored in the buffer is not leaked.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn new_from_prefix_zeroed(bytes: B) -> Option<(Ref<B, T>, B)> {
         map_prefix_tuple_zeroed(Self::new_from_prefix(bytes))
@@ -3144,6 +3165,7 @@ where
     /// If the checks succeed, then the suffix which is consumed will be
     /// initialized to zero. This can be useful when re-using buffers to ensure
     /// that sensitive data previously stored in the buffer is not leaked.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn new_from_suffix_zeroed(bytes: B) -> Option<(B, Ref<B, T>)> {
         map_suffix_tuple_zeroed(Self::new_from_suffix(bytes))
@@ -3168,6 +3190,7 @@ where
     /// # Panics
     ///
     /// `new_slice` panics if `T` is a zero-sized type.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn new_slice_zeroed(bytes: B) -> Option<Ref<B, [T]>> {
         map_zeroed(Self::new_slice(bytes))
@@ -3190,6 +3213,7 @@ where
     /// # Panics
     ///
     /// `new_slice_from_prefix_zeroed` panics if `T` is a zero-sized type.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn new_slice_from_prefix_zeroed(bytes: B, count: usize) -> Option<(Ref<B, [T]>, B)> {
         map_prefix_tuple_zeroed(Self::new_slice_from_prefix(bytes, count))
@@ -3212,6 +3236,7 @@ where
     /// # Panics
     ///
     /// `new_slice_from_suffix_zeroed` panics if `T` is a zero-sized type.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn new_slice_from_suffix_zeroed(bytes: B, count: usize) -> Option<(B, Ref<B, [T]>)> {
         map_suffix_tuple_zeroed(Self::new_slice_from_suffix(bytes, count))
@@ -3227,6 +3252,7 @@ where
     ///
     /// `new_unaligned` verifies that `bytes.len() == size_of::<T>()` and
     /// constructs a new `Ref`. If the check fails, it returns `None`.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn new_unaligned(bytes: B) -> Option<Ref<B, T>> {
         Ref::new(bytes)
@@ -3239,6 +3265,7 @@ where
     /// size_of::<T>()`. It consumes the first `size_of::<T>()` bytes from
     /// `bytes` to construct a `Ref`, and returns the remaining bytes to the
     /// caller. If the length check fails, it returns `None`.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn new_unaligned_from_prefix(bytes: B) -> Option<(Ref<B, T>, B)> {
         Ref::new_from_prefix(bytes)
@@ -3251,6 +3278,7 @@ where
     /// size_of::<T>()`. It consumes the last `size_of::<T>()` bytes from
     /// `bytes` to construct a `Ref`, and returns the preceding bytes to the
     /// caller. If the length check fails, it returns `None`.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn new_unaligned_from_suffix(bytes: B) -> Option<(B, Ref<B, T>)> {
         Ref::new_from_suffix(bytes)
@@ -3271,6 +3299,7 @@ where
     /// # Panics
     ///
     /// `new_slice` panics if `T` is a zero-sized type.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn new_slice_unaligned(bytes: B) -> Option<Ref<B, [T]>> {
         Ref::new_slice(bytes)
@@ -3289,6 +3318,7 @@ where
     /// # Panics
     ///
     /// `new_slice_unaligned_from_prefix` panics if `T` is a zero-sized type.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn new_slice_unaligned_from_prefix(bytes: B, count: usize) -> Option<(Ref<B, [T]>, B)> {
         Ref::new_slice_from_prefix(bytes, count)
@@ -3306,6 +3336,7 @@ where
     /// # Panics
     ///
     /// `new_slice_unaligned_from_suffix` panics if `T` is a zero-sized type.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn new_slice_unaligned_from_suffix(bytes: B, count: usize) -> Option<(B, Ref<B, [T]>)> {
         Ref::new_slice_from_suffix(bytes, count)
@@ -3326,6 +3357,7 @@ where
     /// If the check succeeds, then `bytes` will be initialized to zero. This
     /// can be useful when re-using buffers to ensure that sensitive data
     /// previously stored in the buffer is not leaked.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn new_unaligned_zeroed(bytes: B) -> Option<Ref<B, T>> {
         map_zeroed(Self::new_unaligned(bytes))
@@ -3342,6 +3374,7 @@ where
     /// If the check succeeds, then the prefix which is consumed will be
     /// initialized to zero. This can be useful when re-using buffers to ensure
     /// that sensitive data previously stored in the buffer is not leaked.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn new_unaligned_from_prefix_zeroed(bytes: B) -> Option<(Ref<B, T>, B)> {
         map_prefix_tuple_zeroed(Self::new_unaligned_from_prefix(bytes))
@@ -3358,6 +3391,7 @@ where
     /// If the check succeeds, then the suffix which is consumed will be
     /// initialized to zero. This can be useful when re-using buffers to ensure
     /// that sensitive data previously stored in the buffer is not leaked.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn new_unaligned_from_suffix_zeroed(bytes: B) -> Option<(B, Ref<B, T>)> {
         map_suffix_tuple_zeroed(Self::new_unaligned_from_suffix(bytes))
@@ -3383,6 +3417,7 @@ where
     /// # Panics
     ///
     /// `new_slice` panics if `T` is a zero-sized type.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn new_slice_unaligned_zeroed(bytes: B) -> Option<Ref<B, [T]>> {
         map_zeroed(Self::new_slice_unaligned(bytes))
@@ -3406,6 +3441,7 @@ where
     ///
     /// `new_slice_unaligned_from_prefix_zeroed` panics if `T` is a zero-sized
     /// type.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn new_slice_unaligned_from_prefix_zeroed(
         bytes: B,
@@ -3431,6 +3467,7 @@ where
     ///
     /// `new_slice_unaligned_from_suffix_zeroed` panics if `T` is a zero-sized
     /// type.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn new_slice_unaligned_from_suffix_zeroed(
         bytes: B,
@@ -3448,6 +3485,7 @@ where
     /// Converts this `Ref` into a reference.
     ///
     /// `into_ref` consumes the `Ref`, and returns a reference to `T`.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn into_ref(self) -> &'a T {
         // SAFETY: This is sound because `B` is guaranteed to live for the
@@ -3468,6 +3506,7 @@ where
     /// Converts this `Ref` into a mutable reference.
     ///
     /// `into_mut` consumes the `Ref`, and returns a mutable reference to `T`.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn into_mut(mut self) -> &'a mut T {
         // SAFETY: This is sound because `B` is guaranteed to live for the
@@ -3488,6 +3527,7 @@ where
     /// Converts this `Ref` into a slice reference.
     ///
     /// `into_slice` consumes the `Ref`, and returns a reference to `[T]`.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn into_slice(self) -> &'a [T] {
         // SAFETY: This is sound because `B` is guaranteed to live for the
@@ -3509,6 +3549,7 @@ where
     ///
     /// `into_mut_slice` consumes the `Ref`, and returns a mutable reference to
     /// `[T]`.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn into_mut_slice(mut self) -> &'a mut [T] {
         // SAFETY: This is sound because `B` is guaranteed to live for the
@@ -3538,6 +3579,7 @@ where
     /// this reference. In particular, the referent must exist for all of `'a`,
     /// and no mutable references to the same memory may be constructed during
     /// `'a`.
+    #[redpen::dont_panic]
     unsafe fn deref_helper<'a>(&self) -> &'a T {
         // TODO(#429): Add a "SAFETY" comment and remove this `allow`.
         #[allow(clippy::undocumented_unsafe_blocks)]
@@ -3563,6 +3605,7 @@ where
     /// this reference. In particular, the referent must exist for all of `'a`,
     /// and no other references - mutable or immutable - to the same memory may
     /// be constructed during `'a`.
+    #[redpen::dont_panic]
     unsafe fn deref_mut_helper<'a>(&mut self) -> &'a mut T {
         // TODO(#429): Add a "SAFETY" comment and remove this `allow`.
         #[allow(clippy::undocumented_unsafe_blocks)]
@@ -3582,6 +3625,7 @@ where
     /// # Safety
     ///
     /// `deref_slice_helper` has the same safety requirements as `deref_helper`.
+    #[redpen::dont_panic]
     unsafe fn deref_slice_helper<'a>(&self) -> &'a [T] {
         let len = self.0.len();
         let elem_size = mem::size_of::<T>();
@@ -3612,6 +3656,7 @@ where
     ///
     /// `deref_mut_slice_helper` has the same safety requirements as
     /// `deref_mut_helper`.
+    #[redpen::dont_panic]
     unsafe fn deref_mut_slice_helper<'a>(&mut self) -> &'a mut [T] {
         let len = self.0.len();
         let elem_size = mem::size_of::<T>();
@@ -3637,6 +3682,7 @@ where
     T: ?Sized,
 {
     /// Gets the underlying bytes.
+    #[redpen::dont_panic]
     #[inline]
     pub fn bytes(&self) -> &[u8] {
         &self.0
@@ -3649,6 +3695,7 @@ where
     T: ?Sized,
 {
     /// Gets the underlying bytes mutably.
+    #[redpen::dont_panic]
     #[inline]
     pub fn bytes_mut(&mut self) -> &mut [u8] {
         &mut self.0
@@ -3661,6 +3708,7 @@ where
     T: FromBytes,
 {
     /// Reads a copy of `T`.
+    #[redpen::dont_panic]
     #[inline]
     pub fn read(&self) -> T {
         // SAFETY: Because of the invariants on `Ref`, we know that `self.0` is
@@ -3677,6 +3725,7 @@ where
     T: AsBytes,
 {
     /// Writes the bytes of `t` and then forgets `t`.
+    #[redpen::dont_panic]
     #[inline]
     pub fn write(&mut self, t: T) {
         // SAFETY: Because of the invariants on `Ref`, we know that `self.0` is
@@ -3694,6 +3743,7 @@ where
     T: FromBytes,
 {
     type Target = T;
+    #[redpen::dont_panic]
     #[inline]
     fn deref(&self) -> &T {
         // SAFETY: This is sound because the lifetime of `self` is the same as
@@ -3711,6 +3761,7 @@ where
     B: ByteSliceMut,
     T: FromBytes + AsBytes,
 {
+    #[redpen::dont_panic]
     #[inline]
     fn deref_mut(&mut self) -> &mut T {
         // SAFETY: This is sound because the lifetime of `self` is the same as
@@ -3729,6 +3780,7 @@ where
     T: FromBytes,
 {
     type Target = [T];
+    #[redpen::dont_panic]
     #[inline]
     fn deref(&self) -> &[T] {
         // SAFETY: This is sound because the lifetime of `self` is the same as
@@ -3746,6 +3798,7 @@ where
     B: ByteSliceMut,
     T: FromBytes + AsBytes,
 {
+    #[redpen::dont_panic]
     #[inline]
     fn deref_mut(&mut self) -> &mut [T] {
         // SAFETY: This is sound because the lifetime of `self` is the same as
@@ -3763,6 +3816,7 @@ where
     B: ByteSlice,
     T: FromBytes + Display,
 {
+    #[redpen::dont_panic]
     #[inline]
     fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
         let inner: &T = self;
@@ -3776,6 +3830,7 @@ where
     T: FromBytes,
     [T]: Display,
 {
+    #[redpen::dont_panic]
     #[inline]
     fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
         let inner: &[T] = self;
@@ -3788,6 +3843,7 @@ where
     B: ByteSlice,
     T: FromBytes + Debug,
 {
+    #[redpen::dont_panic]
     #[inline]
     fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
         let inner: &T = self;
@@ -3800,6 +3856,7 @@ where
     B: ByteSlice,
     T: FromBytes + Debug,
 {
+    #[redpen::dont_panic]
     #[inline]
     fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
         let inner: &[T] = self;
@@ -3826,6 +3883,7 @@ where
     B: ByteSlice,
     T: FromBytes + PartialEq,
 {
+    #[redpen::dont_panic]
     #[inline]
     fn eq(&self, other: &Self) -> bool {
         self.deref().eq(other.deref())
@@ -3837,6 +3895,7 @@ where
     B: ByteSlice,
     T: FromBytes + PartialEq,
 {
+    #[redpen::dont_panic]
     #[inline]
     fn eq(&self, other: &Self) -> bool {
         self.deref().eq(other.deref())
@@ -3848,6 +3907,7 @@ where
     B: ByteSlice,
     T: FromBytes + Ord,
 {
+    #[redpen::dont_panic]
     #[inline]
     fn cmp(&self, other: &Self) -> Ordering {
         let inner: &T = self;
@@ -3861,6 +3921,7 @@ where
     B: ByteSlice,
     T: FromBytes + Ord,
 {
+    #[redpen::dont_panic]
     #[inline]
     fn cmp(&self, other: &Self) -> Ordering {
         let inner: &[T] = self;
@@ -3874,6 +3935,7 @@ where
     B: ByteSlice,
     T: FromBytes + PartialOrd,
 {
+    #[redpen::dont_panic]
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         let inner: &T = self;
@@ -3887,6 +3949,7 @@ where
     B: ByteSlice,
     T: FromBytes + PartialOrd,
 {
+    #[redpen::dont_panic]
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         let inner: &[T] = self;
@@ -3934,6 +3997,7 @@ pub unsafe trait ByteSlice:
     Deref<Target = [u8]> + Sized + self::sealed::ByteSliceSealed
 {
     /// Gets a raw pointer to the first byte in the slice.
+    #[redpen::dont_panic]
     #[inline]
     fn as_ptr(&self) -> *const u8 {
         <[u8]>::as_ptr(self)
@@ -3957,6 +4021,7 @@ pub unsafe trait ByteSlice:
 /// `RefMut<[u8]>`.
 pub unsafe trait ByteSliceMut: ByteSlice + DerefMut {
     /// Gets a mutable raw pointer to the first byte in the slice.
+    #[redpen::dont_panic]
     #[inline]
     fn as_mut_ptr(&mut self) -> *mut u8 {
         <[u8]>::as_mut_ptr(self)
@@ -3967,6 +4032,7 @@ impl<'a> sealed::ByteSliceSealed for &'a [u8] {}
 // TODO(#429): Add a "SAFETY" comment and remove this `allow`.
 #[allow(clippy::undocumented_unsafe_blocks)]
 unsafe impl<'a> ByteSlice for &'a [u8] {
+    #[redpen::dont_panic]
     #[inline]
     fn split_at(self, mid: usize) -> (Self, Self) {
         <[u8]>::split_at(self, mid)
@@ -3977,6 +4043,7 @@ impl<'a> sealed::ByteSliceSealed for &'a mut [u8] {}
 // TODO(#429): Add a "SAFETY" comment and remove this `allow`.
 #[allow(clippy::undocumented_unsafe_blocks)]
 unsafe impl<'a> ByteSlice for &'a mut [u8] {
+    #[redpen::dont_panic]
     #[inline]
     fn split_at(self, mid: usize) -> (Self, Self) {
         <[u8]>::split_at_mut(self, mid)
@@ -3987,6 +4054,7 @@ impl<'a> sealed::ByteSliceSealed for cell::Ref<'a, [u8]> {}
 // TODO(#429): Add a "SAFETY" comment and remove this `allow`.
 #[allow(clippy::undocumented_unsafe_blocks)]
 unsafe impl<'a> ByteSlice for cell::Ref<'a, [u8]> {
+    #[redpen::dont_panic]
     #[inline]
     fn split_at(self, mid: usize) -> (Self, Self) {
         cell::Ref::map_split(self, |slice| <[u8]>::split_at(slice, mid))
@@ -3997,6 +4065,7 @@ impl<'a> sealed::ByteSliceSealed for RefMut<'a, [u8]> {}
 // TODO(#429): Add a "SAFETY" comment and remove this `allow`.
 #[allow(clippy::undocumented_unsafe_blocks)]
 unsafe impl<'a> ByteSlice for RefMut<'a, [u8]> {
+    #[redpen::dont_panic]
     #[inline]
     fn split_at(self, mid: usize) -> (Self, Self) {
         RefMut::map_split(self, |slice| <[u8]>::split_at_mut(slice, mid))
@@ -4024,6 +4093,7 @@ mod alloc_support {
     /// # Panics
     ///
     /// Panics if `Vec::reserve(additional)` fails to reserve enough memory.
+    #[redpen::dont_panic]
     #[inline(always)]
     pub fn extend_vec_zeroed<T: FromZeroes>(v: &mut Vec<T>, additional: usize) {
         insert_vec_zeroed(v, v.len(), additional);
@@ -4036,6 +4106,7 @@ mod alloc_support {
     ///
     /// * Panics if `position > v.len()`.
     /// * Panics if `Vec::reserve(additional)` fails to reserve enough memory.
+    #[redpen::dont_panic]
     #[inline]
     pub fn insert_vec_zeroed<T: FromZeroes>(v: &mut Vec<T>, position: usize, additional: usize) {
         assert!(position <= v.len());
