@@ -65,6 +65,7 @@ zerocopy-derive = { version = "=0.8.0-alpha.1", path = "zerocopy-derive" }
 [dev-dependencies]
 assert_matches = "1.5"
 itertools = "0.11"
+no-panic = "0.1.26"
 rand = { version = "0.8.5", features = ["small_rng"] }
 rustversion = "1.0"
 static_assertions = "1.1"

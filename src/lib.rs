@@ -315,6 +315,9 @@ pub use crate::util::ptr::Ptr;
 #[allow(unused_imports)]
 use crate::util::polyfills::NonNullExt as _;
 
+#[cfg(test)]
+use no_panic::no_panic;
+
 #[rustversion::nightly]
 #[cfg(all(test, not(__INTERNAL_USE_ONLY_NIGHLTY_FEATURES_IN_TESTS)))]
 const _: () = {
@@ -5558,6 +5561,7 @@ mod alloc_support {
             drop(v);
         }
 
+        #[no_panic]
         #[test]
         fn test_new_box_zeroed() {
             assert_eq!(*u64::new_box_zeroed(), 0);
